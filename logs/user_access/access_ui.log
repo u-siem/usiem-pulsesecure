@@ -1,0 +1,20 @@
+2021-04-08 11:20:26 - ive - [127.0.0.1] Default Network::System()[] - VPN Tunneling: ACL count = 0.
+2021-04-08 11:20:53 - ive - [82.213.178.130] Default Network::pcsadmin(Users)[] - Primary authentication failed for pcsadmin/System Local from 82.213.178.130
+2021-04-08 11:20:53 - ive - [82.213.178.130] Default Network::pcsadmin(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Failed
+2021-04-08 11:26:31 - ive - [82.213.178.130] Default Network::admin(Users)[] - Primary authentication failed for admin/System Local from 82.213.178.130
+2021-04-08 11:26:31 - ive - [82.213.178.130] Default Network::admin(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Failed
+2021-04-08 11:42:32 - ive - [82.213.178.130] Default Network::UserTest1(Users)[] - Primary authentication failed for UserTest1/System Local from 82.213.178.130
+2021-04-08 11:42:32 - ive - [82.213.178.130] Default Network::UserTest1(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Failed
+2021-04-08 11:44:21 - ive - [82.213.178.130] Default Network::asdfasf(Users)[] - Primary authentication failed for asdfasf/System Local from 82.213.178.130
+2021-04-08 11:44:21 - ive - [82.213.178.130] Default Network::asdfasf(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Failed
+2021-04-08 11:46:32 - ive - [82.213.178.130] Default Network::asdfas(Users)[] - Testing Password realm restrictions failed for asdfas/Users  
+2021-04-08 11:46:32 - ive - [82.213.178.130] Default Network::asdfas(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Short Password
+2021-04-08 11:47:51 - ive - [82.213.178.130] Default Network::usettest1(Users)[] - Primary authentication successful for usettest1/System Local from 82.213.178.130
+2021-04-08 11:47:51 - ive - [82.213.178.130] Default Network::usettest1(Users)[Users] - Login succeeded for usettest1/Users (session:00000000) from 82.213.178.130 with Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0.
+2021-04-08 11:47:51 - ive - [127.0.0.1] Root::System()[] - Number of concurrent users (2) exceeded the system limit (2).
+2021-04-08 11:57:48 - ive - [82.213.178.130] Default Network::usettest1()[] - Logout from 82.213.178.130 (session:00000000)
+2021-04-08 11:58:04 - ive - [82.213.178.130] Default Network::userasdad(Users)[] - Primary authentication failed for userasdad/System Local from 82.213.178.130
+2021-04-08 11:58:04 - ive - [82.213.178.130] Default Network::userasdad(Users)[] - Login failed using auth server System Local (Local Authentication).  Reason: Failed
+2021-04-08 11:58:14 - ive - [82.213.178.130] Default Network::usettest1(Users)[] - Primary authentication successful for usettest1/System Local from 82.213.178.130
+2021-04-08 11:58:14 - ive - [82.213.178.130] Default Network::usettest1(Users)[Users] - Login succeeded for usettest1/Users (session:00000000) from 82.213.178.130 with Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0.
+2021-04-08 11:58:15 - ive - [127.0.0.1] Root::System()[] - Number of concurrent users (2) exceeded the system limit (2).
