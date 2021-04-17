@@ -146,7 +146,7 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
                     //Login succeded
                     log.set_event(SiemEvent::Auth(AuthEvent {
                         hostname : Cow::Owned(hostname.to_string()),
-                        outcome : LoginOutcome::SUCESS,
+                        outcome : LoginOutcome::SUCCESS,
                         login_type : AuthLoginType::Remote(RemoteLogin {
                             user_name : Cow::Owned(user.to_string()),
                             domain : Cow::Owned(user_domain.to_string()),
@@ -158,7 +158,7 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
                     // SOAP login succeeded for
                     log.set_event(SiemEvent::Auth(AuthEvent {
                         hostname : Cow::Owned(hostname.to_string()),
-                        outcome : LoginOutcome::SUCESS,
+                        outcome : LoginOutcome::SUCCESS,
                         login_type : AuthLoginType::Remote(RemoteLogin {
                             user_name : Cow::Owned(user.to_string()),
                             domain : Cow::Owned(user_domain.to_string()),
@@ -170,7 +170,7 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
                     // SOAP login succeeded for
                     log.set_event(SiemEvent::Auth(AuthEvent {
                         hostname : Cow::Owned(hostname.to_string()),
-                        outcome : LoginOutcome::SUCESS,
+                        outcome : LoginOutcome::SUCCESS,
                         login_type : AuthLoginType::Remote(RemoteLogin {
                             user_name : Cow::Owned(user.to_string()),
                             domain : Cow::Owned(user_domain.to_string()),
@@ -246,7 +246,7 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
                     //Login succeded
                     log.set_event(SiemEvent::Auth(AuthEvent {
                         hostname : Cow::Owned(hostname.to_string()),
-                        outcome : LoginOutcome::SUCESS,
+                        outcome : LoginOutcome::SUCCESS,
                         login_type : AuthLoginType::Remote(RemoteLogin {
                             user_name : Cow::Owned(user.to_string()),
                             domain : Cow::Owned(user_domain.to_string()),
@@ -337,6 +337,7 @@ mod filterlog_tests {
                 assert_eq!(log.field("event.code"), Some(&SiemField::U32(31504)));
                 assert_eq!(log.field("observer.ip"), Some(&SiemField::IP(SiemIp::from_ip_str("10.0.0.9").unwrap())));
                 assert_eq!(log.field("user_agent.original"), Some(&SiemField::from_str("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0")));
+                assert_eq!(log.field("event.outcome"), Some(&SiemField::from_str("SUCCESS")));
             },
             Err(_) => panic!("Must be parsed")
         }
