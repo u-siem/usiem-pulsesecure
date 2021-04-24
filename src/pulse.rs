@@ -6,7 +6,7 @@ use usiem::events::{SiemLog, SiemEvent};
 use usiem::events::auth::{AuthEvent,AuthLoginType, LoginOutcome, RemoteLogin};
 use std::collections::BTreeMap;
 
-pub fn parse_general_log(mut log: SiemLog) -> Result<SiemLog, LogParsingError> {
+pub fn parse_general_log(log: SiemLog) -> Result<SiemLog, LogParsingError> {
     let log_line = log.message().to_string();
     let log_line = match log_line.find(" id=") {
         None => return Err(LogParsingError::NoValidParser(log)),
@@ -57,7 +57,7 @@ pub fn extract_fields<'a>(message: &'a str) -> BTreeMap<&'a str, &'a str> {
     let mut last_char = ' ';
     let mut is_string = false;
     let mut start_key_pos = 0;
-    let mut prev_start_key = 0;
+    let mut prev_start_key;
     for (i, c) in message.char_indices() {
         if !is_string {
             if c == '=' {
@@ -102,7 +102,7 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
         Some(fw) => *fw,
         None => return Ok(log)
     };
-    let (id, content) = match msg.find(": ") {
+    let (id, _content) = match msg.find(": ") {
         Some(pos) => (&msg[..pos], &msg[pos + 2..]),
         None => return Err(LogParsingError::ParserError(log))
     };
@@ -142,6 +142,18 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
     match typ {
         "AUT" => {
             match id {
+                23457 => {
+                    //Login failed
+                    log.set_event(SiemEvent::Auth(AuthEvent {
+                        hostname : Cow::Owned(hostname.to_string()),
+                        outcome : LoginOutcome::FAIL,
+                        login_type : AuthLoginType::Remote(RemoteLogin {
+                            user_name : Cow::Owned(user.to_string()),
+                            domain : Cow::Owned(user_domain.to_string()),
+                            source_address : Cow::Owned(source.to_string()),
+                        })
+                    }));
+                },
                 31504 => {
                     //Login succeded
                     log.set_event(SiemEvent::Auth(AuthEvent {
@@ -294,24 +306,12 @@ pub fn parse_msg_field(fields : &BTreeMap<&str, &str>, mut log: SiemLog) -> Resu
     }
 }
 
-fn extract_from_msg<'a>(msg : &'a str) -> Option<&'a str> {
-    let pos = match msg.find(" from ") {
-        Some(p) => p,
-        None => return None
-    };
-    match &msg[pos + 6..].find(" ") {
-        Some(p) => return Some(&msg[pos + 6..*p]),
-        None => return Some(&msg[pos + 6..])
-    };
-}
-
 #[cfg(test)]
 mod filterlog_tests {
     use super::{parse_general_log, extract_fields};
-    use usiem::events::{SiemLog, SiemEvent};
+    use usiem::events::{SiemLog};
     use usiem::events::field::{SiemIp, SiemField};
-    use usiem::events::auth::{AuthLoginType,LoginOutcome};
-    use std::borrow::Cow;
+    use usiem::events::auth::{LoginOutcome};
 
     #[test]
     fn test_extract_fields() {
@@ -325,7 +325,7 @@ mod filterlog_tests {
         assert_eq!(map.get("msg"), Some(&"AUT22673: Logout from 82.213.178.130 (session:00000000)"));
     }
     #[test]
-    fn test_parser() {
+    fn test_login_success() {
         let log = "2021-04-08T12:14:18-07:00 10.0.0.111 PulseSecure: id=firewall time=\"2021-04-08 12:14:18\" pri=6 fw=10.0.0.9 vpn=ive ivs=Default Network user=usertest2 realm=\"Users\" roles=\"Users\" proto=auth src=82.213.178.130 dst= dstname= type=vpn op= arg=\"\" result= sent= rcvd= agent=\"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0\" duration= msg=\"AUT31504: Login succeeded for usertest2/Users (session:00000000) from 82.213.178.130 with Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0.\"";
         let log = SiemLog::new(log.to_string(), 0, SiemIp::V4(0));
         let res = parse_general_log(log);
@@ -337,7 +337,24 @@ mod filterlog_tests {
                 assert_eq!(log.field("event.code"), Some(&SiemField::U32(31504)));
                 assert_eq!(log.field("observer.ip"), Some(&SiemField::IP(SiemIp::from_ip_str("10.0.0.9").unwrap())));
                 assert_eq!(log.field("user_agent.original"), Some(&SiemField::from_str("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0")));
-                assert_eq!(log.field("event.outcome"), Some(&SiemField::from_str("SUCCESS")));
+                assert_eq!(log.field("event.outcome"), Some(&SiemField::from_str(LoginOutcome::SUCCESS.to_string())));
+            },
+            Err(_) => panic!("Must be parsed")
+        }
+    }
+    #[test]
+    fn test_login_failed() {
+        let log = "2021-04-08T11:58:04-07:00 10.0.0.111 PulseSecure: id=firewall time=\"2021-04-08 11:58:04\" pri=6 fw=10.0.0.9 vpn=ive ivs=Default Network user=userasdad realm=\"Users\" roles=\"\" proto=auth src=82.213.178.130 dst= dstname= type=vpn op= arg=\"\" result= sent= rcvd= agent=\"\" duration= msg=\"AUT23457: Login failed using auth server System Local (Local Authentication).  Reason: Failed\"";
+        let log = SiemLog::new(log.to_string(), 0, SiemIp::V4(0));
+        let res = parse_general_log(log);
+        match res {
+            Ok(log) => {
+                assert_eq!(log.field("user.name"), Some(&SiemField::User(String::from("userasdad"))));
+                assert_eq!(log.field("source.ip"), Some(&SiemField::IP(SiemIp::from_ip_str("82.213.178.130").unwrap())));
+                assert_eq!(log.field("user.domain"), Some(&SiemField::Domain(String::from("Users"))));
+                assert_eq!(log.field("event.code"), Some(&SiemField::U32(23457)));
+                assert_eq!(log.field("observer.ip"), Some(&SiemField::IP(SiemIp::from_ip_str("10.0.0.9").unwrap())));
+                assert_eq!(log.field("event.outcome"), Some(&SiemField::from_str(LoginOutcome::FAIL.to_string())));
             },
             Err(_) => panic!("Must be parsed")
         }
